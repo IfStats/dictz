@@ -22,3 +22,19 @@ jobs:
         run: |
           cd backend
           pytest -q
+
+  docker-compose-build-and-test:
+    runs-on: ubuntu-latest
+    needs: backend-tests
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and start services
+        run: |
+          docker compose up --build -d
+      - name: Run backend tests in container
+        run: |
+          docker compose run --rm backend pytest -q
+      - name: Tear down
+        if: always()
+        run: |
+          docker compose down

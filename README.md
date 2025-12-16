@@ -101,5 +101,10 @@ soccer-predictor-app/
   README.md
 ```
 
+## Note
+A minimal backend, frontend, and `docker-compose.yml` were added to this workspace so you can build and run the app locally for demo and testing. These are lightweight scaffolding files; replace them with your real project files if you have the full source.
+
+The frontend now reads `window.__BACKEND_URL__` at runtime (set via the `BACKEND_URL` env var for the container). When running with Docker Compose the frontend is configured to proxy `/api/*` to the `backend` service so API calls from the browser work without CORS adjustments.
+
 ## License
 MIT
