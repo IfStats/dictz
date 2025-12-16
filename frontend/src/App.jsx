@@ -1,40 +1,34 @@
 import React, { useState } from 'react'
-import axios from 'axios'
+import PredictionForm from './components/PredictionForm'
+import ResultCard from './components/ResultCard'
+import { predict } from './services/api'
 
 export default function App() {
-  const [home, setHome] = useState('')
-  const [away, setAway] = useState('')
-  const [res, setRes] = useState(null)
-  const [err, setErr] = useState(null)
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
 
-  async function submit(e) {
-    e.preventDefault()
-    setErr(null)
-    setRes(null)
+  async function handlePredict(payload) {
+    setError(null)
+    setResult(null)
+    setLoading(true)
     try {
-      const backend = (typeof window !== 'undefined' && window.__BACKEND_URL__) ? window.__BACKEND_URL__ : 'http://localhost:8000'
-      const resp = await axios.post(`${backend}/api/predict`, {
-        home_team: home,
-        away_team: away,
-        competition: '',
-        match_date: '',
-      })
-      setRes(resp.data)
+      const data = await predict(payload)
+      setResult(data)
     } catch (e) {
-      setErr(e.toString())
+      setError(e.message || String(e))
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
     <div style={{ padding: 20 }}>
       <h1>Soccer Predictor</h1>
-      <form onSubmit={submit} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <input placeholder="Home team" value={home} onChange={(e) => setHome(e.target.value)} />
-        <input placeholder="Away team" value={away} onChange={(e) => setAway(e.target.value)} />
-        <button type="submit">Predict</button>
-      </form>
-      {err && <div style={{ color: 'red' }}>{err}</div>}
-      {res && <pre style={{ marginTop: 12 }}>{JSON.stringify(res, null, 2)}</pre>}
+      <PredictionForm onPredict={handlePredict} />
+      {loading && <div style={{ marginTop: 12 }}>Loading…</div>}
+      {error && <div style={{ color: 'red', marginTop: 12 }}>{error}</div>}
+      <ResultCard result={result} />
     </div>
   )
 }
